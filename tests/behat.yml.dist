@@ -1,10 +1,33 @@
 default:
-    context:
-        class: Misd\Drupal\RavenModule\FeatureContext
-        parameters:
-            drupal_path: '/var/www/drupal'
-    extensions:
-        Behat\MinkExtension\Extension:
-            base_url: 'http://localhost/'
-            default_session: 'goutte'
-            goutte: ~
+  autoload:
+    - %paths.base%/features/bootstrap
+  suites:
+    default:
+      paths:
+        - %paths.base%/features
+      contexts:
+        - Misd\Drupal\RavenModule\FeatureContext:
+            base_path: %paths.base%
+            drupal_path: '$DRUPAL_TI_DRUPAL_DIR'
+            database: 'drupal_travis_db'
+            username: 'root'
+            password: ''
+            mysqlhost: '127.0.0.1'
+            base_url: '$DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT/'
+        - Drupal\DrupalExtension\Context\DrupalContext
+        - Drupal\DrupalExtension\Context\DrushContext
+        - Drupal\DrupalExtension\Context\MinkContext
+  extensions:
+    Behat\MinkExtension:
+      base_url: "$DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT/"
+      goutte: ~
+      selenium2: ~
+      browser_name: firefox
+    Drupal\DrupalExtension:
+      blackbox: ~
+      api_driver: "drupal"
+      drush_driver: "drush"
+      drupal:
+        drupal_root: "$DRUPAL_TI_DRUPAL_DIR"
+      drush:
+        root: "$DRUPAL_TI_DRUPAL_DIR"

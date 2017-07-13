@@ -2,58 +2,106 @@
 
 namespace Misd\Drupal\RavenModule;
 
-use Behat\Behat\Event\SuiteEvent;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Mink\Driver\BrowserKitDriver;
 use Behat\Mink\Exception\ElementNotFoundException;
 use Behat\Mink\Exception\UnsupportedDriverActionException;
 use Behat\MinkExtension\Context\MinkContext;
 use Behat\MinkExtension\Context\RawMinkContext;
+use Drupal\Driver\DrupalDriver;
+use Drupal\Driver\DrushDriver;
 use Exception;
-use PDO;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
 
+/**
+ *
+ */
 class FeatureContext extends RawMinkContext {
+
   /**
-   * @var FileSystem
+   * @var \Behat\MinkExtension\Context\MinkContext*/
+  private $minkContext;
+
+  private $basePath;
+
+  private $drupalPath;
+
+  private $database;
+
+  private $username;
+
+  private $password;
+
+  private $mysqlhost;
+
+  private $baseUrl;
+
+  private $drushPath;
+
+  private $modulePath;
+
+  private $filesystem;
+
+  private $drush;
+
+  private $dns;
+
+  private $driver;
+
+  /**
+   * FeatureContext constructor.
+   *
+   * @param $base_path
+   * @param $drupal_path
+   * @param $database
+   * @param $username
+   * @param $password
+   * @param $mysqlhost
+   * @param $base_url
    */
-  protected static $filesystem;
-  protected static $drushPath;
-  protected static $drupalPath;
-  protected static $dsn;
-  protected static $modulePath;
+  public function __construct($base_path, $drupal_path, $database, $username, $password, $mysqlhost, $base_url) {
 
-  public function __construct(array $parameters) {
-    $this->useContext('mink', new MinkContext());
+    $this->basePath = $base_path;
+    $this->drupalPath = $drupal_path;
+    $this->database = $database;
+    $this->username = $username;
+    $this->password = $password;
+    $this->mysqlhost = $mysqlhost;
+    $this->baseUrl = $base_url;
 
-    self::setup($parameters);
-  }
+    $this->drushPath = sprintf('%s/vendor/bin/drush.php', $this->basePath);
+    $this->modulePath = dirname($this->basePath);
 
-  protected static function setup(array $parameters) {
-    self::$filesystem = new Filesystem();
-    self::$modulePath = realpath(__DIR__ . '/../../../');
-    self::$drushPath = sprintf('php "%s/tests/vendor/drush/drush/drush.php"', self::$modulePath); # bin/drush broken on Windows
-    self::$drupalPath = $parameters['drupal_path'];
-    self::$dsn = sprintf('sqlite:%s/sites/default/db/site.sqlite', str_replace('\\', '/', $parameters['drupal_path']));
-  }
+    $this->filesystem = new Filesystem();
 
-  protected static function getPdo() {
-    $pdo = new PDO(self::$dsn);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $this->drush = new DrushDriver(NULL, $this->drupalPath, $this->drushPath);
+    $this->drush->setArguments('-y');
 
-    return $pdo;
+    $this->dns = "mysql://" . $this->username . ":" . $this->password . "@" . $this->mysqlhost . "/" . $this->database;
+
   }
 
   /**
-   * @return MinkContext
+   * @return \Behat\MinkExtension\Context\MinkContext
    */
   protected function getMinkContext() {
-    return $this->getMainContext()->getSubcontext('mink');
+    return $this->minkContext;
   }
 
-  protected static function drushCommand($command, $quiet = TRUE) {
-    $command = new Process(sprintf('%s %s --root="%s" --yes %s', self::$drushPath, $command, self::$drupalPath, $quiet ? '--quiet' : ''));
+  /**
+   * @return string
+   */
+  protected function drushCommandRun($command, array $arguments = [], array $options = []) {
+    return $this->drush->drush($command, $arguments, $options);
+  }
+
+  /**
+   * @deprecated
+   */
+  protected function drushCommand($command, $quiet = TRUE) {
+
+    $command = new Process(sprintf('%s %s --root="%s" --yes %s', $this->drushPath, $command, $this->drupalPath, $quiet ? '--quiet' : ''));
     $command->setTimeout(NULL);
     $command->run();
 
@@ -65,52 +113,39 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
-   * @BeforeSuite
+   * @deprecated
    */
-  public static function downloadDrupal(SuiteEvent $event) {
-    self::setup($event->getContextParameters());
-
-    self::clearDrupal();
-
-    $path = dirname(self::$drupalPath);
-    $folder = basename(self::$drupalPath);
-
-    self::drushCommand(sprintf('dl drupal --drupal-project-rename="%s" --destination="%s"', $folder, $path));
-
-    $finder = Finder::create()->exclude('tests')->in(self::$modulePath);
-    self::$filesystem->mirror(self::$modulePath, self::$drupalPath . '/sites/all/modules/raven', $finder, array(
-      'override' => TRUE,
-      'delete' => TRUE
-    ));
+  public function clearDrupal() {
+    return TRUE;
   }
 
-  public static function clearDrupal() {
-    if (FALSE === is_dir(self::$drupalPath)) {
-      return;
-    };
+  /**
+   * @BeforeScenario */
+  public function before(BeforeScenarioScope $scope) {
+    /**
+     * Get the environment
+     * @var \Behat\Behat\Context\Environment\InitializedContextEnvironment $environment
+     */
+    $environment = $scope->getEnvironment();
 
-    self::$filesystem->chmod(self::$drupalPath, 0777, 0000, TRUE);
-    self::$filesystem->remove(self::$drupalPath);
+    /**
+     * Get all the contexts you need in this context
+     * @var \Drupal\DrupalExtension\Context\MinkContext minkContext
+     */
+    $this->minkContext = $environment->getContext('Drupal\DrupalExtension\Context\MinkContext');
   }
 
   /**
    * @BeforeScenario
    */
   public function makeSite() {
-    $site = self::$drupalPath . '/sites/default';
-    $master = self::$drupalPath . '/sites/master';
+    /** @var \Drupal\Driver\DrupalDriver $driver */
+    $this->driver = new DrupalDriver($this->drupalPath, $this->baseUrl);
+    $this->driver->setCoreFromVersion();
 
-    if (FALSE === is_dir($master)) {
-      self::drushCommand(sprintf('site-install testing --account-name="admin" --account-pass="password" --db-url="%s"', self::$dsn));
-      $this->theModuleIsEnabled('raven');
-      $this->theVariableIsSetTo('raven_service', 'demo');
-
-      self::$filesystem->mirror($site, $master);
-    }
-    else {
-      self::$filesystem->chmod($site, 0777, 0000, TRUE);
-      self::$filesystem->mirror($master, $site, NULL, array('override' => TRUE, 'delete' => TRUE));
-    }
+    // Bootstrap Drupal.
+    $this->driver->bootstrap();
+    $this->drushCommandRun('upwd', ['admin'], ['password' => 'password']);
   }
 
   /**
@@ -142,41 +177,34 @@ class FeatureContext extends RawMinkContext {
    * @Given /^the "([^"]*)" role has the "([^"]*)" "([^"]*)" permission$/
    */
   public function theRoleHasThePermission($role, $module, $permission) {
-    $rid = $this->findRidForRole($role);
-
-    $sth = self::getPdo()
-      ->prepare('INSERT OR REPLACE INTO role_permission (rid, permission, module) VALUES (:rid, :permission, :module)');
-    $sth->execute(array(':rid' => $rid, ':permission' => $permission, ':module' => $module));
+    self::drushCommandRun('role-add-perm', [
+      sprintf("'%s'", $role),
+      sprintf("'%s'", $permission),
+    ], ['module' => $module]);
   }
 
   /**
    * @Given /^the "([^"]*)" role does not have the "([^"]*)" "([^"]*)" permission$/
    */
   public function theRoleDoesNotHaveThePermission($role, $module, $permission) {
-    $rid = $this->findRidForRole($role);
-
-    $sth = self::getPdo()
-      ->prepare('DELETE FROM role_permission WHERE rid = :rid AND permission = :permission AND module = :module');
-    $sth->execute(array(':rid' => $rid, ':permission' => $permission, 'module' => $module));
+    self::drushCommandRun('role-remove-perm', [
+      sprintf("'%s'", $role),
+      sprintf("'%s'", $permission),
+    ], ['module' => $module]);
   }
 
+  /**
+   *
+   */
   protected function findRidForRole($role) {
-    $sth = self::getPdo()->prepare('SELECT rid FROM role WHERE name = :role LIMIT 1');
-    $sth->execute(array(':role' => $role));
-    $results = $sth->fetch(PDO::FETCH_ASSOC);
-
-    if (FALSE === $results) {
-      throw new Exception('Can\'t find role ' . $role);
-    }
-
-    return $results['rid'];
+    return user_roles(TRUE)[$role]->id();
   }
 
   /**
    * @Given /^the "([^"]*)" module is enabled$/
    */
   public function theModuleIsEnabled($module) {
-    self::drushCommand(sprintf('pm-enable "%s" --resolve-dependencies', $module));
+    self::drushCommandRun('pm-enable', (array) $module, ['resolve-dependencies' => TRUE]);
   }
 
   /**
@@ -185,18 +213,30 @@ class FeatureContext extends RawMinkContext {
   public function iHaveARavenResponseWithAProblem($problem) {
     $url = rtrim($this->getMinkParameter('base_url'), '/') . '/';
 
-    if (FALSE === in_array($problem, array('kid', 'url', 'auth', 'sso', 'invalid', 'incomplete', 'expired'))) {
+    if (FALSE === in_array($problem, [
+      'kid',
+      'url',
+      'auth',
+      'sso',
+      'invalid',
+      'incomplete',
+      'expired',
+    ])
+    ) {
       throw new Exception('Unknown problem');
     }
 
-    $this->getSession()->visit(create_raven_response($url, 200, 'test0001', $problem));
+    $this->getSession()
+      ->visit(create_raven_response($url, 200, 'test0001', $problem));
   }
 
   /**
    * @Given /^there is a user called "([^"]*)" with the e-?mail address "([^"]*)"$/
    */
   public function thereIsAUserCalledWithTheEmailAddress($username, $emailAddress) {
-    self::drushCommand(sprintf('user-create "%s" --mail="%s"', $username, $emailAddress));
+    if (FALSE === user_load_by_name($username)) {
+      self::drushCommand(sprintf('user-create "%s" --mail="%s"', $username, $emailAddress));
+    }
   }
 
   /**
@@ -209,11 +249,9 @@ class FeatureContext extends RawMinkContext {
   /**
    * @Given /^the "([^"]*)" variable is set to "([^"]*)"$/
    */
-  public function theVariableIsSetTo($variable, $value) {
-    $value = maybe_serialize($value);
-
-    $sth = self::getPdo()->prepare('INSERT OR REPLACE INTO variable (name, value) VALUES (:variable, :value)');
-    $sth->execute(array(':variable' => $variable, ':value' => $value));
+  public function theVariableIsSetTo($variable, $value, $config_name = 'raven.raven_settings') {
+    // $value = maybe_serialize($value);
+    self::drushCommandRun('config-set', [$config_name, $variable, $value]);
   }
 
   /**
@@ -279,7 +317,11 @@ class FeatureContext extends RawMinkContext {
   public function theBlockIsInTheRegion($module, $delta, $region) {
     $sth = self::getPdo()
       ->prepare('UPDATE block SET status = 1, region = :region WHERE module = :module AND delta = :delta');
-    $sth->execute(array(':region' => $region, ':module' => $module, 'delta' => $delta));
+    $sth->execute([
+      ':region' => $region,
+      ':module' => $module,
+      'delta' => $delta,
+    ]);
   }
 
   /**
@@ -309,10 +351,15 @@ class FeatureContext extends RawMinkContext {
     $minkContext->selectOption('Severity', $severity);
     $minkContext->pressButton('Filter');
 
-    foreach ($this->getSession()->getPage()->findAll('css', 'table tbody a') as $event) {
+    foreach ($this->getSession()
+      ->getPage()
+      ->findAll('css', 'table tbody a') as $event) {
       $event->click();
 
-      if (FALSE !== strpos($this->getSession()->getPage()->getText(), $message)) {
+      if (FALSE !== strpos($this->getSession()
+        ->getPage()
+        ->getText(), $message)
+      ) {
         return;
       }
 
@@ -333,7 +380,7 @@ class FeatureContext extends RawMinkContext {
       throw new UnsupportedDriverActionException('Keeping sessions cookies are not supported by %s', $driver);
     }
 
-    /** @var BrowserKitDriver $driver */
+    /** @var \Behat\Mink\Driver\BrowserKitDriver $driver */
     $client = $driver->getClient();
 
     $cookies = $client->getCookieJar()->all();
@@ -359,41 +406,27 @@ class FeatureContext extends RawMinkContext {
       $text .= '?q=';
     }
 
-    $element = $this->getMinkContext()->assertSession()->elementExists('css', $element);
+    $element = $this->getMinkContext()
+      ->assertSession()
+      ->elementExists('css', $element);
 
     if ($element->getText() !== $text) {
       throw new Exception('Element text is "' . $element->getText() . '", but expected "' . $text . '"');
     }
   }
 
-  protected function getVariable($variable) {
-    $sth = self::getPdo()->prepare('SELECT * FROM variable WHERE name = :variable LIMIT 1');
-
-    $sth->execute(array(':variable' => $variable));
-
-    $results = $sth->fetch(PDO::FETCH_ASSOC);
-
-    return $results['value'];
+  /**
+   *
+   */
+  protected function getVariable($variable, $config_name = 'raven.raven_settings') {
+    self::drushCommandRun('config-get', [$config_name, $variable]);
   }
 
+  /**
+   *
+   */
   protected function isVariable($variable, $expected) {
-    $expected = maybe_serialize($expected);
-
-    $possible = array($expected);
-
-    if ('b:1;' === $expected) {
-      $possible[] = 'i:1;';
-    }
-    elseif ('i:1;' === $expected) {
-      $possible[] = 'b:1;';
-    }
-    elseif ('b:0;' === $expected) {
-      $possible[] = 'i:0;';
-    }
-    elseif ('i:0;' === $expected) {
-      $possible[] = 'b:0;';
-    }
-
-    return in_array($this->getVariable($variable), $possible, TRUE);
+    return $this->getVariable($variable);
   }
+
 }

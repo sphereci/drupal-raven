@@ -1,0 +1,6 @@
+raven.raven_settings_form:
+  title: 'Raven authentication'
+  route_name: raven.raven_settings_form
+  description: 'Settings to configure logging in with Raven'
+  parent: user.admin_index
+  weight: 99

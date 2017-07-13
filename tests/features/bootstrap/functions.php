@@ -1,7 +1,14 @@
 <?php
 
+/**
+ * @file
+ */
+
+/**
+ *
+ */
 function is_serialized($value) {
-  // Bit of a give away this one
+  // Bit of a give away this one.
   if (!is_string($value)) {
     return FALSE;
   }
@@ -74,6 +81,9 @@ function is_serialized($value) {
   return TRUE;
 }
 
+/**
+ *
+ */
 function maybe_serialize($data) {
   if (FALSE === is_serialized($data)) {
     if ('TRUE' === $data) {
@@ -95,6 +105,9 @@ function maybe_serialize($data) {
   return $data;
 }
 
+/**
+ *
+ */
 function create_raven_response($url, $status = 200, $principal = 'test0001', $problem = NULL) {
   if (FALSE === in_array($status, array(200, 410, 510, 520, 530, 540, 560, 570, 999))) {
     $status = 200;
@@ -125,10 +138,12 @@ function create_raven_response($url, $status = 200, $principal = 'test0001', $pr
       $response['auth'] = 'test';
       $response['sso'] = '';
       break;
+
     case 'sso':
       $response['auth'] = '';
       $response['sso'] = 'test';
       break;
+
     default:
       $response['auth'] = 'pwd';
       $response['sso'] = '';
@@ -203,9 +218,10 @@ Y6iyl0/GyBRzAXYemQJAVeChw15Lj2/uE7HIDtkqd8POzXjumOxKPfESSHKxRGnP
 
   switch ($problem) {
     case 'invalid':
-      // need an invalid response, so just need to change a value
+      // Need an invalid response, so just need to change a value.
       $response['id'] = 12312424;
       break;
+
     case 'incomplete':
       unset($response['id']);
       break;

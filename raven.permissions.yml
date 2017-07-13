@@ -1,0 +1,3 @@
+administer raven authentication:
+  title: 'Administer Raven authentication configuration.'
+  restrict access: true

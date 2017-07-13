@@ -1,0 +1,25 @@
+raven.raven_settings_form:
+  path: 'admin/config/people/raven'
+  defaults:
+    _form: '\Drupal\raven\Form\RavenSettingsForm'
+    _title: 'Raven authentication'
+  requirements:
+    _permission: 'administer raven authentication'
+  options:
+    _admin_route: TRUE
+
+raven.main_controller.login_form:
+  path: '/raven/login'
+  defaults:
+    _controller: '\Drupal\raven\Controller\MainController::loginForm'
+    _title: 'Raven log in'
+  requirements:
+    _user_is_logged_in: 'FALSE'
+
+raven.main_controller.login_auth:
+  path: '/raven/login/auth'
+  defaults:
+    _controller: '\Drupal\raven\Controller\MainController::loginAuth'
+    _title: 'loginAuth'
+  requirements:
+    _user_is_logged_in: 'FALSE'

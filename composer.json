@@ -1,0 +1,19 @@
+{
+  "name": "sphereci/raven",
+  "type": "drupal-module",
+  "description": "Raven",
+  "keywords": ["Drupal"],
+  "license": "GPL-2.0+",
+  "homepage": "https://github.com/sphereci/drupal-raven",
+  "minimum-stability": "dev",
+  "support": {
+    "issues": "https://github.com/sphereci/drupal-raven/issues",
+    "source": "https://github.com/sphereci/drupal-raven.git"
+  },
+  "conflict": {
+    "drupal/raven": "*"
+  },
+  "require": {
+    "drupal/externalauth": "^1.0"
+  }
+}

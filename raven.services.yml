@@ -1,0 +1,20 @@
+services:
+
+  plugin.manager.raven_server_plugin:
+    class: Drupal\raven\Plugin\RavenServerPluginManager
+    parent: default_plugin_manager
+
+  raven.service:
+    class: Drupal\raven\RavenService
+    arguments:
+      - '@config.factory'
+      - '@plugin.manager.raven_server_plugin'
+      - '@externalauth.externalauth'
+      - '@externalauth.authmap'
+      - '@session'
+
+  request_listener:
+    class: Drupal\raven\EventSubscriber\RequestListener
+    arguments: ['@config.manager']
+    tags:
+      - { name: event_subscriber }

@@ -5,25 +5,33 @@
         {
             "name": "Chris Wilkinson",
             "email": "chris.wilkinson@admin.cam.ac.uk"
+        },
+        {
+            "name": "Yuriy Boychenko",
+            "email": "yuboychenko@gmail.com"
         }
     ],
     "autoload": {
-        "classmap": ["features/bootstrap/"],
+        "psr-4": {
+            "": "src/",
+            "Misd\\Drupal\\RavenModule\\": "features/bootstrap/"
+        },
+        "classmap": ["features/bootstrap"],
         "files": ["features/bootstrap/functions.php"]
     },
     "require": {
-        "php": ">=5.2.0",
-        "ext-openssl": "*",
-        "behat/behat": "~2.0",
-        "behat/mink": "~1.0",
-        "behat/mink-extension": "~1.0",
-        "behat/mink-goutte-driver": "~1.0",
-        "drush/drush": "~6.0",
         "symfony/filesystem": "~2.3",
         "symfony/finder": "~2.3",
-        "symfony/process": "~2.3"
+        "webflo/drupal-finder": "^0",
+        "symfony/process": "~2.3",
+        "symfony/dependency-injection": "2.8.2",
+        "symfony/event-dispatcher": "2.8.2",
+        "drupal/drupal-extension": "~3.0",
+        "drupal/drupal-driver": "dev-master",
+        "drush/drush": "^8",
+        "lionsad/drupal_ti": "1.*"
     },
     "config": {
-        "bin-dir": "bin/"
+        "vendor-dir": "vendor"
     }
 }

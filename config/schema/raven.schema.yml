@@ -1,0 +1,28 @@
+raven.raven_settings:
+  type: config_object
+  label: 'Raven settings'
+  mapping:
+    raven_login_override:
+      type: integer
+      label: 'Enable Raven login override'
+    raven_backdoor_login:
+      type: integer
+      label: 'Enable non-Raven backdoor login'
+    raven_override_administrator_approval:
+      type: integer
+      label: 'Enable administrator approval override'
+    raven_allow_raven_for_life:
+      type: integer
+      label: 'Allow Raven for Life accounts to be authenticated'
+    raven_service:
+      type: string
+      label: 'Raven service'
+    raven_logout_on_browser_close:
+      type: boolean
+      label: 'Log out Raven users when closing the browser'
+    raven_website_description:
+      type: string
+      label: 'Your website description'
+    raven_login_fail_redirect:
+      type: string
+      label: 'Login failure redirect'

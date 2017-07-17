@@ -1,0 +1,46 @@
+version: '3'
+services:
+  drupal:
+    build:
+      context: builds/starter
+    #image: spheresh/drupal-raven-behat:latest
+    volumes:
+      - .:/var/www/drupal/modules/custom/raven
+      - .:/var/www/drupal-raven
+    ports:
+      - 8080:80
+    environment:
+      - DRUPAL_TI_RUNNERS="behat"
+      - DRUPAL_TI_DEBUG="true"
+
+#    network_mode: "host"
+#    depends_on:
+#      - mysql
+    working_dir: /var/www/drupal-raven/tests
+    networks:
+      some-network:
+        ipv4_address: 172.16.238.10
+
+  mysql:
+    build:
+      context: builds/mysql
+    # image: mysql:5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=drupal
+      - MYSQL_PASSWORD=drupal
+      - MYSQL_DATABASE=database_name
+    expose:
+      - 3306
+    networks:
+      some-network:
+        ipv4_address: 172.16.238.20
+#    network_mode: "host"
+
+networks:
+  some-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24

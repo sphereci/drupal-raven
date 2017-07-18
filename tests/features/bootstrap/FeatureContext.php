@@ -77,7 +77,6 @@ class FeatureContext extends RawMinkContext {
 
     $this->drush = new DrushDriver(NULL, $this->drupalPath, $this->drushPath);
     $this->drush->setArguments('-y');
-
     $this->dns = "mysql://" . $this->username . ":" . $this->password . "@" . $this->mysqlhost . "/" . $this->database;
 
   }

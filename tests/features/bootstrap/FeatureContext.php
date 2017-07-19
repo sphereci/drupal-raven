@@ -258,6 +258,14 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
+   * @Given /^the config "([^"]*)" of "([^"]*)" variable is set to "([^"]*)"$/
+   */
+  public function theConfigOfVariableIsSetTo($variable, $config_name, $value)
+  {
+    return $this->theVariableIsSetTo($variable, $value, $config_name);
+  }
+
+  /**
    * @Given /^the state "([^"]*)" is set to "([^"]*)"$/
    */
   public function theStateIsSetTo($state_name, $value)

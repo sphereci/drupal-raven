@@ -1,0 +1,8 @@
+name: Raven Test
+type: module
+description: Raven Test
+core: 8.x
+package: Custom
+dependencies:
+  - raven
+

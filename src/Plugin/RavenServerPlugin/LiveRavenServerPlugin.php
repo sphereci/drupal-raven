@@ -58,6 +58,6 @@ hAM+a6/30F5fdkWpE1smPyrfASyXRfWE4Ccn1RVgYX9u
    * {@inheritdoc}
    */
   public function getRedirect() {
-    // TODO: Implement getRedirect() method.
+    return $this->ravenLogin();
   }
 }

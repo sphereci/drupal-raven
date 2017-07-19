@@ -60,6 +60,6 @@ wOq24EIbX5LquL9w+uvnfXw=
    * {@inheritdoc}
    */
   public function getRedirect() {
-    return $this->ravenLogin(); // '/' /*Url::fromRoute('<front>', [], ['absolute' => TRUE])->toString()*/
+    return $this->ravenLogin();
   }
 }

@@ -22,26 +22,20 @@ abstract class RavenServerPluginBase extends PluginBase implements RavenServerPl
     global $base_url;
 
     if ($redirect === NULL) {
-      if (isset($_GET['destination']) && FALSE === UrlHelper::isExternal($_GET['destination'])) {
-        $redirect = $_GET['destination'];
-      }
-      elseif (NULL != $_SERVER['HTTP_REFERER']) {
-        $redirect = $_SERVER['HTTP_REFERER'];
-      }
-      else {
-        $redirect = $base_url . '/';
+      $redirect = '/';
+      if (isset($_GET['back_path'])) {
+        if(FALSE === UrlHelper::isExternal($_GET['back_path'])) {
+          $redirect = '/' . implode('/',array_filter(explode('/', $_GET['back_path'])));
+        }
       }
     }
-
-    $website_description = \Drupal::config('raven.raven_settings')->get('raven_website_description');
+    $site_name = \Drupal::config('system.site')->get('name', '');
+    $website_description = \Drupal::config('raven.raven_settings')->get('raven_website_description') ?: $site_name;
 
     $params['ver'] = '3';
-    $params['url'] = $base_url . '/';
+    $params['url'] = $base_url . RAVEN_BASE_URL;
     $params['desc'] = !empty($website_description) ? $website_description : \Drupal::config('raven.raven_settings')->get('site_name', $base_url);
-
-    // @TODO
-    // $params['params'] = Url::fromUserInput($redirect, array('absolute' => TRUE, 'language' => (object) array('language' => FALSE)))->toString();
-    unset($_GET['destination']);
+    $params['params'] = $redirect;
     return Url::fromUri($this->getUrl(), array('query' => $params));
   }
 

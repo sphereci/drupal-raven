@@ -3,7 +3,12 @@
 namespace Drupal\raven\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Block\BlockManager;
+use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Routing\RouteMatch;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\user\Plugin\Block\UserLoginBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\ConfigManager;
 
@@ -15,14 +20,12 @@ use Drupal\Core\Config\ConfigManager;
  *  admin_label = @Translation("Raven Login Link Block"),
  * )
  */
-class RavenLoginLinkBlock extends BlockBase implements ContainerFactoryPluginInterface {
+class RavenLoginLinkBlock extends UserLoginBlock implements ContainerFactoryPluginInterface {
 
   /**
-   * Drupal\Core\Config\ConfigManager definition.
-   *
-   * @var \Drupal\Core\Config\ConfigManager
+   * @var \Drupal\Core\Config\ConfigFactory
    */
-  protected $configManager;
+  protected $configFactory;
 
   /**
    * Constructs a new RavenLoginLinkBlock object.
@@ -33,11 +36,12 @@ class RavenLoginLinkBlock extends BlockBase implements ContainerFactoryPluginInt
    *   The plugin_id for the plugin instance.
    * @param string $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Config\ConfigManager $config_manager
+   * @param \Drupal\Core\Config\ConfigManager $config_factory
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigManager $config_manager) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->configManager = $config_manager;
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactory $config_factory, RouteMatchInterface $route_match) { // , BlockManager $block_manager
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $route_match);
+    $this->configFactory = $config_factory;
+    $this->settings = $this->configFactory->get('raven.raven_settings');
   }
 
   /**
@@ -48,7 +52,8 @@ class RavenLoginLinkBlock extends BlockBase implements ContainerFactoryPluginInt
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('config.manager')
+      $container->get('config.factory'),
+      $container->get('current_route_match')
     );
   }
 
@@ -56,6 +61,9 @@ class RavenLoginLinkBlock extends BlockBase implements ContainerFactoryPluginInt
    * {@inheritdoc}
    */
   public function build() {
+    if($this->settings->get('raven_login_override', FALSE) == FALSE) {
+      return parent::build();
+    }
     $build = [];
     $build['raven_login_form'] = \Drupal::formBuilder()->getForm('\Drupal\raven\Form\LoginForm');
     return $build;

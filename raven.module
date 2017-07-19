@@ -9,7 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-
+define('RAVEN_BASE_URL','/user/login');
 /**
  * Implements hook_help().
  */
@@ -48,12 +48,9 @@ function raven_help($route_name, RouteMatchInterface $route_match) {
  * Implements hook_block_view_alter().
  */
 function raven_block_alter(&$definitions) {
-  $config = \Drupal::configFactory()->get('raven.raven_settings');
-
-  if ($definitions['user_login_block'] && $config->get('raven_login_override', TRUE)) {
+  if ($definitions['user_login_block']) {
     $definitions['user_login_block']['class'] = '\Drupal\raven\Plugin\Block\RavenLoginLinkBlock';
   }
-
 }
 
 
@@ -62,11 +59,12 @@ function raven_block_alter(&$definitions) {
  */
 function raven_form_alter(&$form, FormStateInterface $form_state, $form_id) {
     // Change form id here
-    if ($form_id == 'user_login_form') {
+    if (in_array($form_id, ['user_login_form', 'user_register_form'])) {
       $form['actions']['raven'] = [
         '#type' => 'link',
         '#title' => t('Log in with Raven'),
-        '#url' => Url::fromRoute('raven.main_controller.login_form')
+        '#url' => Url::fromRoute('raven.main_controller.login_form'),
+        '#weight' => 100,
       ];
     }
 }

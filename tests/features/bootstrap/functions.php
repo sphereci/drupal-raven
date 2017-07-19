@@ -2,10 +2,11 @@
 
 /**
  * @file
+ * Helper for testing.
  */
 
 /**
- *
+ * {@inheritdoc}
  */
 function is_serialized($value) {
   // Bit of a give away this one.
@@ -82,7 +83,9 @@ function is_serialized($value) {
 }
 
 /**
+ * It used to prepare variable to set/get into drush.
  *
+ * @deprecated
  */
 function maybe_serialize($data) {
   if (FALSE === is_serialized($data)) {
@@ -106,10 +109,10 @@ function maybe_serialize($data) {
 }
 
 /**
- *
+ * Create raven responce for test service.
  */
 function create_raven_response($url, $status = 200, $principal = 'test0001', $problem = NULL) {
-  if (FALSE === in_array($status, array(200, 410, 510, 520, 530, 540, 560, 570, 999))) {
+  if (FALSE === in_array($status, [200, 410, 510, 520, 530, 540, 560, 570, 999])) {
     $status = 200;
   }
 

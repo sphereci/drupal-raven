@@ -15,6 +15,9 @@ raven.main_controller.login_form:
     _title: 'Raven log in'
   requirements:
     _user_is_logged_in: 'FALSE'
+  options:
+    _maintenance_access: TRUE
+    no_cache: TRUE
 
 raven.main_controller.login_auth:
   path: '/raven/login/auth'
@@ -23,3 +26,6 @@ raven.main_controller.login_auth:
     _title: 'loginAuth'
   requirements:
     _user_is_logged_in: 'FALSE'
+  options:
+    _maintenance_access: TRUE
+    no_cache: TRUE

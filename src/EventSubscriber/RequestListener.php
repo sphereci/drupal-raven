@@ -3,6 +3,7 @@
 namespace Drupal\raven\EventSubscriber;
 
 use Drupal\Core\Url;
+use Drupal\raven\RavenService;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Config\ConfigManager;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -27,8 +28,9 @@ class RequestListener implements EventSubscriberInterface {
    * Constructs a new RequestListener object.
    * @param \Drupal\Core\Config\ConfigManager $config_manager
    */
-  public function __construct(ConfigManager $config_manager) {
+  public function __construct(ConfigManager $config_manager, RavenService $raven_service) {
     $this->configManager = $config_manager;
+    $this->ravenService = $raven_service;
   }
 
   /**

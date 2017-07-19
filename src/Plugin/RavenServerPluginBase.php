@@ -29,7 +29,8 @@ abstract class RavenServerPluginBase extends PluginBase implements RavenServerPl
         }
       }
     }
-    $website_description = \Drupal::config('raven.raven_settings')->get('raven_website_description');
+    $site_name = \Drupal::config('system.site')->get('name', '');
+    $website_description = \Drupal::config('raven.raven_settings')->get('raven_website_description') ?: $site_name;
 
     $params['ver'] = '3';
     $params['url'] = $base_url . RAVEN_BASE_URL;

@@ -122,7 +122,6 @@ class RavenSettingsForm extends ConfigFormBase {
     ];
 
     // Log users out when closing the browser?
-    // @TODO Currently doesn't work.
     $form['raven_logout_on_browser_close'] = [
       '#type' => 'checkbox',
       '#disabled' => TRUE,
@@ -131,13 +130,15 @@ class RavenSettingsForm extends ConfigFormBase {
       '#description' => $this->t('Drupal, by default, does not log the user out when closing the browser (the session is kept active for over %session.storage.options% days into services.yml). Raven applications, however, are usually expected to do so. This option logs out users who have logged in through Raven when the browser is closed.<br /><i>Note: Enabling this will not affect existing sessions, users will need to log out manually first.</i>'),
     ];
 
+    $site_name = \Drupal::config('system.site')->get('name', '');
+
     // Site description for Raven Login page.
     $form['raven_website_description'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Your website description'),
       '#default_value' => $config->get('raven_website_description', NULL),
       // Get custom description, otherwise the site name, otherwise the site url.
-      '#description' => $this->t('When Raven prompts the user to log in it will display a message with the text <i>\'[...] This resource calls itself \'SITE DESCRIPTION\' and [...]</i>, where SITE DESCRIPTION is specified here. If left blank, the site name will be used (currently \'@sitename\').', ['@sitename' => $config->get('site_name', '')]),
+      '#description' => $this->t('When Raven prompts the user to log in it will display a message with the text <i>\'[...] This resource calls itself \'SITE DESCRIPTION\' and [...]</i>, where SITE DESCRIPTION is specified here. If left blank, the site name will be used (currently \'@sitename\').', ['@sitename' => $site_name]),
     ];
 
     // Site redirect if a login fails.

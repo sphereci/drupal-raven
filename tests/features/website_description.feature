@@ -9,20 +9,14 @@ Feature: Website description
     And I press "Save configuration"
     Then the "raven_website_description" variable should be "Website Description"
 
-  Scenario: Uses site name when not set
-    Given the "site_name" variable is set to "My Site Name"
-    And the "raven_website_description" variable is set to "NULL"
-    When I go to "/raven/login"
-    Then I should see "My Site Name"
-
   Scenario: Uses site name when an empty string
-    Given the "site_name" variable is set to "My Site Name"
+    Given the config "name" of "system.site" variable is set to "My Site Name"
     And the "raven_website_description" variable is set to ""
     When I go to "/raven/login"
     Then I should see "My Site Name"
 
   Scenario: Uses website description over site name
-    Given the "site_name" variable is set to "My Site Name"
+    Given the config "name" of "system.site" variable is set to "My Site Name"
     And the "raven_website_description" variable is set to "Website Description"
     When I go to "/raven/login"
     Then I should see "Website Description"
@@ -34,7 +28,7 @@ Feature: Website description
     Then I should see "Foo & Bar"
 
   Scenario: Encodes site name
-    Given the "site_name" variable is set to "Foo & Bar"
-    And the "raven_website_description" variable is set to "NULL"
+    Given the config "name" of "system.site" variable is set to "Foo & Bar"
+    And the "raven_website_description" variable is set to ""
     When I go to "/raven/login"
     Then I should see "Foo & Bar"

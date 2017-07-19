@@ -264,7 +264,7 @@ class FeatureContext extends RawMinkContext {
    */
   public function theVariableIsSetTo($variable, $value, $config_name = 'raven.raven_settings') {
     // $value = maybe_serialize($value);
-    $this->drushCommandRun('config-set', [$config_name, $variable, $value]);
+    $this->drushCommandRun('config-set', [$config_name, $variable, "'{$value}'"]);
   }
 
   /**

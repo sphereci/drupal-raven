@@ -3,6 +3,7 @@ Feature: Login message
 
   Scenario Outline: Login page message
     When I go to "<path>"
+    And the config "register" of "user.settings" variable is set to "visitors"
     Then I should see "Log in with Raven" in the ".region-content form .form-actions a" element
     When I follow "Log in with Raven"
     Then I should be on "https://demo.raven.cam.ac.uk/auth/authenticate.html"

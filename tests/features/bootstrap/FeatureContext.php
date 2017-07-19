@@ -149,6 +149,7 @@ class FeatureContext extends RawMinkContext {
     // Bootstrap Drupal.
     $this->driver->bootstrap();
     $this->drushCommandRun('upwd', ['admin'], ['password' => 'password']);
+    $this->theStateIsSetTo('system.maintenance_mode ',0);
   }
 
   /**
@@ -180,7 +181,7 @@ class FeatureContext extends RawMinkContext {
    * @Given /^the "([^"]*)" role has the "([^"]*)" "([^"]*)" permission$/
    */
   public function theRoleHasThePermission($role, $module, $permission) {
-    self::drushCommandRun('role-add-perm', [
+    $this->drushCommandRun('role-add-perm', [
       sprintf("'%s'", $role),
       sprintf("'%s'", $permission),
     ], ['module' => $module]);
@@ -190,7 +191,7 @@ class FeatureContext extends RawMinkContext {
    * @Given /^the "([^"]*)" role does not have the "([^"]*)" "([^"]*)" permission$/
    */
   public function theRoleDoesNotHaveThePermission($role, $module, $permission) {
-    self::drushCommandRun('role-remove-perm', [
+    $this->drushCommandRun('role-remove-perm', [
       sprintf("'%s'", $role),
       sprintf("'%s'", $permission),
     ], ['module' => $module]);
@@ -207,7 +208,7 @@ class FeatureContext extends RawMinkContext {
    * @Given /^the "([^"]*)" module is enabled$/
    */
   public function theModuleIsEnabled($module) {
-    self::drushCommandRun('pm-enable', (array) $module, ['resolve-dependencies' => TRUE]);
+    $this->drushCommandRun('pm-enable', (array) $module, ['resolve-dependencies' => TRUE]);
   }
 
   /**
@@ -234,19 +235,28 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
+   * @Given /^unsure that a user called "([^"]*)" is not exist$/
+   */
+  public function unsureThatAUserCalledIsNotExist($username)
+  {
+    if (FALSE !== user_load_by_name($username)) {
+      $this->drushCommandRun('user-cancel', [$username]);
+    }
+  }
+  
+  /**
    * @Given /^there is a user called "([^"]*)" with the e-?mail address "([^"]*)"$/
    */
   public function thereIsAUserCalledWithTheEmailAddress($username, $emailAddress) {
-    if (FALSE === user_load_by_name($username)) {
-      self::drushCommand(sprintf('user-create "%s" --mail="%s"', $username, $emailAddress));
-    }
+    $this->unsureThatAUserCalledIsNotExist($username);
+    $this->drushCommandRun('user-create', [$username], ['mail'=>$emailAddress]);
   }
 
   /**
    * @Given /^the user "([^"]*)" is blocked$/
    */
   public function theUserIsBlocked($username) {
-    self::drushCommand(sprintf('user-block "%s"', $username));
+    $this->drushCommandRun('user-block', [$username]);
   }
 
   /**
@@ -254,7 +264,7 @@ class FeatureContext extends RawMinkContext {
    */
   public function theVariableIsSetTo($variable, $value, $config_name = 'raven.raven_settings') {
     // $value = maybe_serialize($value);
-    self::drushCommandRun('config-set', [$config_name, $variable, $value]);
+    $this->drushCommandRun('config-set', [$config_name, $variable, $value]);
   }
 
   /**
@@ -270,7 +280,7 @@ class FeatureContext extends RawMinkContext {
    */
   public function theStateIsSetTo($state_name, $value)
   {
-    self::drushCommandRun('state-set', [$state_name, $value]);
+    $this->drushCommandRun('state-set', [$state_name, $value]);
   }
 
   /**
@@ -331,7 +341,7 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
-   * @Given /^the "([^"]*)" "([^"]*)" block is in the "([^"]*)" region$/
+   * @deprecated
    */
   public function theBlockIsInTheRegion($module, $delta, $region) {
     $sth = self::getPdo()
@@ -447,7 +457,7 @@ class FeatureContext extends RawMinkContext {
    *
    */
   protected function getVariable($variable, $config_name = 'raven.raven_settings') {
-    self::drushCommandRun('config-get', [$config_name, $variable]);
+    $this->drushCommandRun('config-get', [$config_name, $variable]);
   }
 
   /**

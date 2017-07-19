@@ -19,13 +19,13 @@ Feature: Raven failure
   Scenario: Raven failure redirect path has to be valid
     Given I am logged in as the admin user
     And I am on "/admin/config/people/raven"
-    When I fill in "Login failure redirect" with "foo"
+    When I fill in "Login failure redirect" with "/foo"
     And I press "Save configuration"
-    Then I should see "The path 'foo' is either invalid or you do not have access to it."
+    Then I should see "The path '/foo' is either invalid or you do not have access to it."
 
   Scenario: Raven failure redirect path stores unaliased path
     Given the "path" module is enabled
-    And the "/raven/login" path has the alias "/foo"
+    And the "/user/login" path has the alias "/foo"
     And I am logged in as the admin user
     And I am on "/admin/config/people/raven"
     When I fill in "Login failure redirect" with "/foo"

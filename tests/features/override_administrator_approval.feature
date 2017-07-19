@@ -1,7 +1,6 @@
 @d8 @api
 Feature: Override administrator approval
 
-  @run
   Scenario: Can configure administrator approval override
     Given the "raven_override_administrator_approval" variable is set to "0"
     And I am logged in as the admin user
@@ -10,7 +9,6 @@ Feature: Override administrator approval
     And I press "Save configuration"
     Then the "raven_override_administrator_approval" variable should be "1"
 
-  @run
   Scenario: Lets Raven users create accounts when administrator approval is overridden
     Given the "dblog" module is enabled
     And the config "user_register" of "user.settings" variable is set to "visitors_admin_approval"
@@ -19,7 +17,6 @@ Feature: Override administrator approval
     And I should see "Log out"
     And I should see an "notice" "raven" Watchdog message "New user: test0001 (test0001@cam.ac.uk)."
 
-  @run
   Scenario: Doesn't let normal users create accounts when administrator approval is overridden for Raven
     Given the config "user_register" of "user.settings" variable is set to "visitors_admin_approval"
     And the "raven_override_administrator_approval" variable is set to "1"

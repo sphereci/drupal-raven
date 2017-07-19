@@ -20,7 +20,8 @@ use Symfony\Component\Process\Process;
 class FeatureContext extends RawMinkContext {
 
   /**
-   * @var \Behat\MinkExtension\Context\MinkContext*/
+   * @var \Behat\MinkExtension\Context\MinkContext
+   */
   private $minkContext;
 
   private $basePath;
@@ -119,16 +120,19 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
-   * @BeforeScenario */
+   * @BeforeScenario
+   */
   public function before(BeforeScenarioScope $scope) {
     /**
      * Get the environment
+     *
      * @var \Behat\Behat\Context\Environment\InitializedContextEnvironment $environment
      */
     $environment = $scope->getEnvironment();
 
     /**
      * Get all the contexts you need in this context
+     *
      * @var \Drupal\DrupalExtension\Context\MinkContext minkContext
      */
     $this->minkContext = $environment->getContext('Drupal\DrupalExtension\Context\MinkContext');
@@ -251,6 +255,14 @@ class FeatureContext extends RawMinkContext {
   public function theVariableIsSetTo($variable, $value, $config_name = 'raven.raven_settings') {
     // $value = maybe_serialize($value);
     self::drushCommandRun('config-set', [$config_name, $variable, $value]);
+  }
+
+  /**
+   * @Given /^the state "([^"]*)" is set to "([^"]*)"$/
+   */
+  public function theStateIsSetTo($state_name, $value)
+  {
+    self::drushCommandRun('state-set', [$state_name, $value]);
   }
 
   /**

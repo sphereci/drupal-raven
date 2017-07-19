@@ -3,6 +3,7 @@
 namespace Drupal\raven\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Routing\RedirectDestination;
 use Drupal\Core\Routing\TrustedRedirectResponse;
 use Drupal\raven\RavenService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,7 +53,18 @@ class MainController extends ControllerBase {
    *   Return Hello string.
    */
   public function loginForm() {
-    return new TrustedRedirectResponse($this->ravenService->getCurrentServer()->getRedirect()->toString());
+    $request = \Drupal::request();
+    $session = $request->getSession();
+
+    if ($session != FALSE && $session->has('wls_response')) {
+      $wlsResponse = $session->get('wls_response');
+      $session->remove('wls_response');
+      return $this->ravenService->raven_auth($wlsResponse);
+
+    }
+    return new TrustedRedirectResponse($this->ravenService->getCurrentServer()
+      ->getRedirect()
+      ->toString());
   }
 
   /**
@@ -63,17 +75,19 @@ class MainController extends ControllerBase {
    */
   public function loginAuth() {
 
-    $request = \Drupal::request();
-    $session = $request->getSession();
+//    $request = \Drupal::request();
+//    $session = $request->getSession();
+//
+//    if ($session != FALSE && $session->has('wls_response')) {
+//      $session->remove('wls_response');
+////      drupal_set_message('Event kernel.request thrown by Subscriber in module raven.', 'status', TRUE);
+//
+//      $wlsResponse = $session->get('wls_response');
+//      return $this->ravenService->raven_auth($wlsResponse);
+//    }
+//
+//    return new TrustedRedirectResponse('/');
 
-    if ($session != FALSE && $session->has('wls_response')) {
-      //$session->remove('wls_response');
-      drupal_set_message('Event kernel.request thrown by Subscriber in module raven.', 'status', TRUE);
-
-    }
-
-    $wlsResponse = $session->get('wls_response');
-    return $this->ravenService->raven_auth($wlsResponse);
   }
 
 }

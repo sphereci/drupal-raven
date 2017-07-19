@@ -1,6 +1,6 @@
-raven_login_override: 1
+raven_login_override: 0
 raven_backdoor_login: 0
-raven_override_administrator_approval: 0
+raven_override_administrator_approval: 1
 raven_allow_raven_for_life: 0
 raven_service: "demo"
 raven_logout_on_browser_close: 0

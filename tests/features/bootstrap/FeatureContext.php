@@ -149,7 +149,7 @@ class FeatureContext extends RawMinkContext {
     // Bootstrap Drupal.
     $this->driver->bootstrap();
     $this->drushCommandRun('upwd', ['admin'], ['password' => 'password']);
-    $this->theStateIsSetTo('system.maintenance_mode ',0);
+    $this->theStateIsSetTo('system.maintenance_mode', 0);
   }
 
   /**
@@ -237,19 +237,18 @@ class FeatureContext extends RawMinkContext {
   /**
    * @Given /^unsure that a user called "([^"]*)" is not exist$/
    */
-  public function unsureThatAUserCalledIsNotExist($username)
-  {
+  public function unsureThatAUserCalledIsNotExist($username) {
     if (FALSE !== user_load_by_name($username)) {
       $this->drushCommandRun('user-cancel', [$username]);
     }
   }
-  
+
   /**
    * @Given /^there is a user called "([^"]*)" with the e-?mail address "([^"]*)"$/
    */
   public function thereIsAUserCalledWithTheEmailAddress($username, $emailAddress) {
     $this->unsureThatAUserCalledIsNotExist($username);
-    $this->drushCommandRun('user-create', [$username], ['mail'=>$emailAddress]);
+    $this->drushCommandRun('user-create', [$username], ['mail' => $emailAddress]);
   }
 
   /**
@@ -270,16 +269,14 @@ class FeatureContext extends RawMinkContext {
   /**
    * @Given /^the config "([^"]*)" of "([^"]*)" variable is set to "([^"]*)"$/
    */
-  public function theConfigOfVariableIsSetTo($variable, $config_name, $value)
-  {
+  public function theConfigOfVariableIsSetTo($variable, $config_name, $value) {
     return $this->theVariableIsSetTo($variable, $value, $config_name);
   }
 
   /**
    * @Given /^the state "([^"]*)" is set to "([^"]*)"$/
    */
-  public function theStateIsSetTo($state_name, $value)
-  {
+  public function theStateIsSetTo($state_name, $value) {
     $this->drushCommandRun('state-set', [$state_name, $value]);
   }
 
@@ -454,14 +451,14 @@ class FeatureContext extends RawMinkContext {
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   protected function getVariable($variable, $config_name = 'raven.raven_settings') {
     $this->drushCommandRun('config-get', [$config_name, $variable]);
   }
 
   /**
-   *
+   * {@inheritdoc}
    */
   protected function isVariable($variable, $expected) {
     return $this->getVariable($variable);

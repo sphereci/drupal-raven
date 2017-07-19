@@ -11,7 +11,7 @@ Feature: Raven for Life
 
   Scenario: Rejection when Raven for Life users are not allowed
     Given the "dblog" module is enabled
-    And the "user_register" variable is set to "1"
+    And the config "register" of "user.settings" variable is set to "visitors"
     And the "raven_allow_raven_for_life" variable is set to "0"
     When I log in to Raven as "test0401"
     Then I should see "Raven for Life accounts are not allowed to access the site."
@@ -19,6 +19,6 @@ Feature: Raven for Life
 
   Scenario: Success when Raven for Life users allowed to authenticate
     Given the "raven_allow_raven_for_life" variable is set to "1"
-    And the "user_register" variable is set to "2"
+    And the config "register" of "user.settings" variable is set to "visitors_admin_approval"
     When I log in to Raven as "test0401"
     Then I should see "Thank you for applying for an account. Your account is currently pending approval by the site administrator."

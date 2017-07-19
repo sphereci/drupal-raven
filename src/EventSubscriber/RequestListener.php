@@ -63,7 +63,7 @@ class RequestListener implements EventSubscriberInterface {
       $uri .= '?' . http_build_query($request->query->all());
     }
     $request->getSession()->set('wls_response', $wlsResponse);
-//    return $this->ravenService->raven_auth($wlsResponse);
+    $event->setResponse(new RedirectResponse(Url::fromRoute('raven.main_controller.login_auth')->toString()));
 
   }
 

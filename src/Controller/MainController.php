@@ -75,18 +75,15 @@ class MainController extends ControllerBase {
    */
   public function loginAuth() {
 
-//    $request = \Drupal::request();
-//    $session = $request->getSession();
-//
-//    if ($session != FALSE && $session->has('wls_response')) {
-//      $session->remove('wls_response');
-////      drupal_set_message('Event kernel.request thrown by Subscriber in module raven.', 'status', TRUE);
-//
-//      $wlsResponse = $session->get('wls_response');
-//      return $this->ravenService->raven_auth($wlsResponse);
-//    }
-//
-//    return new TrustedRedirectResponse('/');
+    $request = \Drupal::request();
+    $session = $request->getSession();
+
+    if ($session != FALSE && $session->has('wls_response')) {
+      $wlsResponse = $session->get('wls_response');
+      $session->remove('wls_response');
+      return $this->ravenService->raven_auth($wlsResponse);
+
+    }
 
   }
 

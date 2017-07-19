@@ -32,7 +32,7 @@ abstract class RavenServerPluginBase extends PluginBase implements RavenServerPl
     $website_description = \Drupal::config('raven.raven_settings')->get('raven_website_description');
 
     $params['ver'] = '3';
-    $params['url'] = $base_url . '/raven/login';
+    $params['url'] = $base_url . RAVEN_BASE_URL;
     $params['desc'] = !empty($website_description) ? $website_description : \Drupal::config('raven.raven_settings')->get('site_name', $base_url);
     $params['params'] = $redirect;
     return Url::fromUri($this->getUrl(), array('query' => $params));

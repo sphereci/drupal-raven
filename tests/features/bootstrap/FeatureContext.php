@@ -214,7 +214,7 @@ class FeatureContext extends RawMinkContext {
    * @Given /^I have a Raven response with an? "([^"]*)" problem$/
    */
   public function iHaveARavenResponseWithAProblem($problem) {
-    $url = rtrim($this->getMinkParameter('base_url'), '/') . '/';
+    $url = rtrim($this->getMinkParameter('base_url'), '/') . RAVEN_BASE_URL;
 
     if (FALSE === in_array($problem, [
       'kid',
@@ -355,11 +355,20 @@ class FeatureContext extends RawMinkContext {
    */
   public function iShouldSeeAWatchdogMessage($severity, $type, $message) {
     $minkContext = $this->getMinkContext();
-
+    $severity_map = array_flip([
+      'emergency',
+      'alert',
+      'critical',
+      'error',
+      'warning',
+      'notice',
+      'info',
+      'debug',
+    ]);
     $this->iAmLoggedInAsTheAdminUser();
     $minkContext->visit('/admin/reports/dblog');
     $minkContext->selectOption('Type', $type);
-    $minkContext->selectOption('Severity', $severity);
+    $minkContext->selectOption('Severity', $severity_map[$severity]);
     $minkContext->pressButton('Filter');
 
     foreach ($this->getSession()

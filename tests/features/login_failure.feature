@@ -14,7 +14,7 @@ Feature: Raven failure
   Examples:
     | clean url | config page                  |
     | TRUE      | /admin/config/people/raven   |
-    | FALSE     | ?q=admin/config/people/raven |
+#    | FALSE     | ?q=admin/config/people/raven |
 
   Scenario: Raven failure redirect path has to be valid
     Given I am logged in as the admin user
@@ -25,16 +25,16 @@ Feature: Raven failure
 
   Scenario: Raven failure redirect path stores unaliased path
     Given the "path" module is enabled
-    And the "node" path has the alias "foo"
+    And the "/raven/login" path has the alias "/foo"
     And I am logged in as the admin user
     And I am on "/admin/config/people/raven"
-    When I fill in "Login failure redirect" with "foo"
+    When I fill in "Login failure redirect" with "/foo"
     And I press "Save configuration"
-    Then the "raven_login_fail_redirect" variable should be "node"
-    And the "Login failure redirect" field should contain "node"
+    Then the "raven_login_fail_redirect" variable should be "/node"
+    And the "Login failure redirect" field should contain "/foo"
 
   Scenario: Redirects on failure
-    Given the "raven_login_fail_redirect" variable is set to "foo"
+    Given the "raven_login_fail_redirect" variable is set to "/foo"
     When I go to "/?WLS-Response"
     Then I should be on "/foo"
 
@@ -43,11 +43,11 @@ Feature: Raven failure
     When I press "Cancel"
     Then I should see "Raven authentication cancelled"
 
-  Scenario: Pressing cancel fails gracefully when clean URLs are disabled
-    Given the "clean_url" variable is set to "FALSE"
-    And I am on "/?q=raven/login"
-    When I press "Cancel"
-    Then I should see "Raven authentication cancelled"
+#  Scenario: Pressing cancel fails gracefully when clean URLs are disabled
+#    Given the "clean_url" variable is set to "FALSE"
+#    And I am on "/?q=raven/login"
+#    When I press "Cancel"
+#    Then I should see "Raven authentication cancelled"
 
   Scenario: 'kid' problem causes failure
     Given the "dblog" module is enabled

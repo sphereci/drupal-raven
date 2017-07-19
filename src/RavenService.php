@@ -144,11 +144,11 @@ class RavenService implements RavenServiceInterface {
       }
 
       // Valid path check
-      if ($r_url !== $base_url . '/raven/login') {
+      if ($r_url !== $base_url . RAVEN_BASE_URL) {
         drupal_set_message(t('Suspicious login attempt denied and logged.'), 'error');
         $this->logger->alert('Suspicious login attempt claiming to be @raven_id. \'url\' validation failed: expecting \'@expected\', got \'@given\'.', array(
           '@raven_id' => $r_principal,
-          '@expected' => $base_url . '/raven/login',
+          '@expected' => $base_url . RAVEN_BASE_URL,
           '@given' => $r_url,
         ));
         return $this->failRedirect();

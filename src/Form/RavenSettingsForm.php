@@ -68,6 +68,7 @@ class RavenSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+
     $config = $this->config('raven.raven_settings');
     $form['raven_login_override'] = [
       '#type' => 'checkbox',
@@ -136,7 +137,7 @@ class RavenSettingsForm extends ConfigFormBase {
       '#title' => $this->t('Your website description'),
       '#default_value' => $config->get('raven_website_description', NULL),
       // Get custom description, otherwise the site name, otherwise the site url.
-      '#description' => $this->t('When Raven prompts the user to log in it will display a message with the text <i>\'[...] This resource calls itself \'SITE DESCRIPTION\' and [...]</i>, where SITE DESCRIPTION is specified here. If left blank, the site name will be used (currently \'@sitename\').', ['@sitename' => $config->get('site_name', $base_url)]),
+      '#description' => $this->t('When Raven prompts the user to log in it will display a message with the text <i>\'[...] This resource calls itself \'SITE DESCRIPTION\' and [...]</i>, where SITE DESCRIPTION is specified here. If left blank, the site name will be used (currently \'@sitename\').', ['@sitename' => $config->get('site_name', '')]),
     ];
 
     // Site redirect if a login fails.
@@ -156,7 +157,10 @@ class RavenSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    parent::validateForm($form, $form_state);
+    // Validate login failure redirect path.
+    if (!empty($form_state->getValue('raven_login_fail_redirect')) && !\Drupal::service('path.validator')->isValid($form_state->getValue('raven_login_fail_redirect'))) {
+      $form_state->setErrorByName('raven_login_fail_redirect', $this->t("The path '%path' is either invalid or you do not have access to it.", array('%path' => $form_state->getValue('raven_login_fail_redirect'))));
+    }
   }
 
   /**

@@ -22,10 +22,10 @@ abstract class RavenServerPluginBase extends PluginBase implements RavenServerPl
     global $base_url;
 
     if ($redirect === NULL) {
-      $redirect = '/';
+      $redirect = $base_url;
       if (isset($_GET['back_path'])) {
         if(FALSE === UrlHelper::isExternal($_GET['back_path'])) {
-          $redirect = '/' . implode('/',array_filter(explode('/', $_GET['back_path'])));
+          $redirect = $redirect . implode('/',array_filter(explode('/', $_GET['back_path'])));
         }
       }
     }

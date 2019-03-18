@@ -2,15 +2,13 @@
 
 namespace Drupal\raven\Plugin\Block;
 
-use Drupal\Core\Block\BlockBase;
-use Drupal\Core\Block\BlockManager;
+use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Config\ConfigFactory;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Routing\RouteMatch;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\user\Plugin\Block\UserLoginBlock;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Config\ConfigManager;
 
 /**
  * Provides a 'RavenLoginLinkBlock' block.
@@ -27,6 +25,8 @@ class RavenLoginLinkBlock extends UserLoginBlock implements ContainerFactoryPlug
    */
   protected $configFactory;
 
+  protected $settings;
+
   /**
    * Constructs a new RavenLoginLinkBlock object.
    *
@@ -36,9 +36,10 @@ class RavenLoginLinkBlock extends UserLoginBlock implements ContainerFactoryPlug
    *   The plugin_id for the plugin instance.
    * @param string $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\Core\Config\ConfigManager $config_factory
+   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactory $config_factory, RouteMatchInterface $route_match) { // , BlockManager $block_manager
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, ConfigFactory $config_factory, RouteMatchInterface $route_match) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $route_match);
     $this->configFactory = $config_factory;
     $this->settings = $this->configFactory->get('raven.raven_settings');
@@ -61,12 +62,26 @@ class RavenLoginLinkBlock extends UserLoginBlock implements ContainerFactoryPlug
    * {@inheritdoc}
    */
   public function build() {
-    if($this->settings->get('raven_login_override', FALSE) == FALSE) {
+    if ($this->settings->get('raven_login_override', FALSE) == FALSE) {
       return parent::build();
     }
     $build = [];
-    $build['raven_login_form'] = \Drupal::formBuilder()->getForm('\Drupal\raven\Form\LoginForm');
+    $build['raven_login_form'] = \Drupal::formBuilder()
+      ->getForm('\Drupal\raven\Form\LoginForm');
     return $build;
+  }
+
+  /**
+   * @param \Drupal\Core\Session\AccountInterface $account
+   *
+   * @return $this|\Drupal\Core\Access\AccessResultInterface
+   */
+  protected function blockAccess(AccountInterface $account) {
+    if ($account->isAnonymous()) {
+      return AccessResult::allowed()
+        ->addCacheContexts(['route.name', 'user.roles:anonymous']);
+    }
+    return AccessResult::forbidden();
   }
 
 }

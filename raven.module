@@ -65,6 +65,9 @@ function raven_form_alter(&$form, FormStateInterface $form_state, $form_id) {
         '#title' => t('Log in with Raven'),
         '#url' => Url::fromRoute('raven.main_controller.login_form'),
         '#weight' => 100,
+        '#attributes' => [
+          'class' => ['form-submit']
+        ]
       ];
     }
 }
